@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Krakens Canvas</title>
+    <link rel="icon" type="image/png" href="assets/icon.png">
+    <link rel="apple-touch-icon" href="assets/icon.png">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="toolbar" aria-label="Drawing controls">
+        <div class="brand">
+          <strong>Krakens Canvas</strong>
+          <span id="deviceStatus">Pointer ready</span>
+        </div>
+
+        <div class="page-control" aria-label="Pages">
+          <div id="pageTabs" class="page-tabs" role="tablist" aria-label="Canvas pages"></div>
+          <button id="addPageButton" type="button" aria-label="Add page">+</button>
+        </div>
+
+        <div class="control-group" role="group" aria-label="Tools">
+          <button class="tool-button is-active" type="button" data-tool="pen" aria-pressed="true">Pen</button>
+          <button class="tool-button" type="button" data-tool="eraser" aria-pressed="false">Eraser</button>
+          <button class="tool-button" type="button" data-tool="pan" aria-pressed="false">Pan</button>
+        </div>
+
+        <label class="slider-control">
+          <span>Size</span>
+          <input id="sizeInput" type="range" min="2" max="48" value="14">
+        </label>
+
+        <label class="slider-control">
+          <span>Spill</span>
+          <input id="spillInput" type="range" min="0" max="100" value="48">
+        </label>
+
+        <label class="slider-control">
+          <span>Smooth</span>
+          <input id="smoothInput" type="range" min="0" max="95" value="42">
+        </label>
+
+        <div class="ink-control" aria-label="Ink color">
+          <span>Ink</span>
+          <div class="swatches" role="group" aria-label="Ink color presets">
+            <button class="swatch is-active" type="button" data-color="#f5f5f5" aria-label="White ink" style="--swatch: #f5f5f5"></button>
+            <button class="swatch" type="button" data-color="#9fd3ff" aria-label="Blue ink" style="--swatch: #9fd3ff"></button>
+            <button class="swatch" type="button" data-color="#ffc46b" aria-label="Amber ink" style="--swatch: #ffc46b"></button>
+            <button class="swatch" type="button" data-color="#ff8ca3" aria-label="Rose ink" style="--swatch: #ff8ca3"></button>
+            <button class="swatch" type="button" data-color="#8ff0bf" aria-label="Green ink" style="--swatch: #8ff0bf"></button>
+          </div>
+          <input id="colorInput" type="color" value="#f5f5f5" aria-label="Custom ink color">
+        </div>
+
+        <label class="slider-control">
+          <span>Grid</span>
+          <input id="gridInput" type="range" min="16" max="80" value="28">
+        </label>
+
+        <label class="toggle-control">
+          <input id="gridToggle" type="checkbox" checked>
+          <span>Grid</span>
+        </label>
+
+        <label class="toggle-control">
+          <input id="focusToggle" type="checkbox">
+          <span>Focus</span>
+        </label>
+
+        <div class="pressure-readout" aria-label="Live pressure">
+          <span>Pressure</span>
+          <meter id="pressureMeter" min="0" max="1" value="0"></meter>
+          <output id="pressureValue">0.00</output>
+        </div>
+
+        <div class="control-group" role="group" aria-label="Canvas actions">
+          <button id="undoButton" type="button" disabled>Undo</button>
+          <button id="redoButton" type="button" disabled>Redo</button>
+          <button id="clearButton" type="button">Clear</button>
+          <button id="saveButton" type="button">Save PNG</button>
+        </div>
+      </section>
+
+      <section class="board-wrap" aria-label="Drawing board">
+        <div id="board" class="board">
+          <canvas id="inkCanvas" aria-label="Pressure-sensitive ink canvas"></canvas>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
