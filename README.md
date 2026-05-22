@@ -22,6 +22,10 @@ A small local whiteboard prototype for pressure-sensitive tablet drawing.
 
 Double-click `Start Inkboard.cmd`. It opens the board in a standalone Edge app window with no local server.
 
+## Keep It On Top
+
+Run `Toggle Always On Top.cmd` to pin or unpin the Krakens Canvas window above other apps. If the board is not open yet, the toggle opens it first.
+
 ## App icon
 
 Krakens Canvas uses `assets/icon.png` for its favicon/app icon. Save the mascot image there, then reopen the local app window.
