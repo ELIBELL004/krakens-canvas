@@ -1,0 +1,12 @@
+{
+  "name": "krakens-canvas",
+  "version": "0.2.0",
+  "description": "A local pressure-sensitive whiteboard for sketching ideas.",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^42.2.0"
+  }
+}

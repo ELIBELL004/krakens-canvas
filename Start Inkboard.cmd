@@ -1,3 +1,7 @@
 @echo off
 setlocal
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$path = Join-Path '%~dp0' 'index.html'; $uri = [System.Uri]::new($path).AbsoluteUri; Start-Process msedge -ArgumentList @('--app=' + $uri, '--new-window')"
+cd /d "%~dp0"
+if not exist "node_modules\electron\dist\electron.exe" (
+  call npm.cmd install
+)
+start "" "%~dp0node_modules\.bin\electron.cmd" "%~dp0"

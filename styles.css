@@ -170,6 +170,13 @@ button:disabled {
   color: #111;
 }
 
+#pinButton.is-active,
+#shareButton.is-active {
+  border-color: rgba(255, 255, 255, 0.62);
+  background: var(--accent);
+  color: #111;
+}
+
 .slider-control {
   display: grid;
   flex: 0 1 88px;
@@ -243,6 +250,10 @@ button:disabled {
   height: 18px;
   margin: 0;
   accent-color: var(--accent);
+}
+
+.auto-share-control {
+  min-height: 34px;
 }
 
 .pressure-readout {

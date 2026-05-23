@@ -22,9 +22,13 @@ const undoButton = document.querySelector("#undoButton");
 const redoButton = document.querySelector("#redoButton");
 const clearButton = document.querySelector("#clearButton");
 const saveButton = document.querySelector("#saveButton");
+const pinButton = document.querySelector("#pinButton");
+const shareButton = document.querySelector("#shareButton");
+const autoShareToggle = document.querySelector("#autoShareToggle");
 const toolButtons = Array.from(document.querySelectorAll("[data-tool]"));
 const swatchButtons = Array.from(document.querySelectorAll("[data-color]"));
 const toolbar = document.querySelector(".toolbar");
+const nativeApi = window.krakensNative;
 
 const defaultPalette = ["#f5f5f5", "#9fd3ff", "#ffc46b", "#ff8ca3", "#8ff0bf"];
 
@@ -93,6 +97,7 @@ function loadState() {
     gridInput.value = settings.grid || gridInput.value;
     gridToggle.checked = settings.gridVisible !== false;
     focusToggle.checked = settings.focusMode === true;
+    autoShareToggle.checked = settings.autoShare === true;
   } catch {
     state.pages = [createPage(1)];
     state.activePageId = state.pages[0].id;
@@ -114,6 +119,7 @@ function saveNow() {
     pages: state.pages,
     settings: {
       focusMode: focusToggle.checked,
+      autoShare: autoShareToggle.checked,
       grid: gridInput.value,
       gridVisible: gridToggle.checked,
       size: sizeInput.value,
@@ -123,6 +129,30 @@ function saveNow() {
   };
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+}
+
+async function refreshNativeState() {
+  if (!nativeApi) {
+    pinButton.disabled = true;
+    shareButton.disabled = true;
+    autoShareToggle.disabled = true;
+    pinButton.title = "Launch Krakens Canvas with Start Inkboard.cmd to use native pinning.";
+    shareButton.title = "Launch Krakens Canvas with Start Inkboard.cmd to share snapshots.";
+    return;
+  }
+
+  try {
+    const isPinned = await nativeApi.getAlwaysOnTop();
+    updatePinButton(isPinned);
+  } catch {
+    deviceStatus.textContent = "native controls unavailable";
+  }
+}
+
+function updatePinButton(isPinned) {
+  pinButton.classList.toggle("is-active", isPinned);
+  pinButton.textContent = isPinned ? "Pinned" : "Pin";
+  pinButton.setAttribute("aria-pressed", String(isPinned));
 }
 
 function getCanvasRect() {
@@ -241,6 +271,46 @@ function render() {
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.drawImage(inkLayer, 0, 0);
+}
+
+async function shareSnapshot(options = {}) {
+  if (!nativeApi) return null;
+
+  render();
+  const page = activePage();
+  const result = await nativeApi.saveSnapshot({
+    activePageName: page.name,
+    dataUrl: canvas.toDataURL("image/png"),
+    viewport: {
+      scale: page.view.scale,
+      x: page.view.x,
+      y: page.view.y,
+    },
+  });
+
+  if (!options.quiet) {
+    shareButton.classList.add("is-active");
+    window.setTimeout(() => shareButton.classList.remove("is-active"), 650);
+    deviceStatus.textContent = "shared for Codex";
+  }
+
+  return result;
+}
+
+let autoShareTimer = 0;
+function scheduleAutoShare() {
+  if (!nativeApi || !autoShareToggle.checked) return;
+
+  window.clearTimeout(autoShareTimer);
+  autoShareTimer = window.setTimeout(() => {
+    shareSnapshot({ quiet: true })
+      .then(() => {
+        deviceStatus.textContent = "auto-shared";
+      })
+      .catch(() => {
+        deviceStatus.textContent = "share failed";
+      });
+  }, 400);
 }
 
 function drawGrid(targetCtx, width, height, view) {
@@ -532,6 +602,7 @@ function endPointer(event) {
     state.currentStroke = null;
     updateHistoryButtons();
     scheduleSave();
+    scheduleAutoShare();
   }
 
   state.drawing = false;
@@ -737,6 +808,34 @@ undoButton.addEventListener("click", undo);
 redoButton.addEventListener("click", redo);
 clearButton.addEventListener("click", clearPage);
 saveButton.addEventListener("click", savePng);
+pinButton.addEventListener("click", async () => {
+  if (!nativeApi) return;
+
+  try {
+    updatePinButton(await nativeApi.toggleAlwaysOnTop());
+  } catch {
+    deviceStatus.textContent = "pin failed";
+  }
+});
+shareButton.addEventListener("click", () => {
+  shareSnapshot().catch(() => {
+    deviceStatus.textContent = "share failed";
+  });
+});
+autoShareToggle.addEventListener("change", () => {
+  scheduleSave();
+  if (autoShareToggle.checked) {
+    shareSnapshot({ quiet: true })
+      .then(() => {
+        deviceStatus.textContent = "auto-share on";
+      })
+      .catch(() => {
+        deviceStatus.textContent = "share failed";
+      });
+  } else {
+    deviceStatus.textContent = "auto-share off";
+  }
+});
 gridInput.addEventListener("input", () => {
   scheduleSave();
   requestRender();
@@ -785,3 +884,4 @@ renderPageTabs();
 updateFocusMode();
 resizeCanvas();
 updateHistoryButtons();
+refreshNativeState();

@@ -20,11 +20,15 @@ A small local whiteboard prototype for pressure-sensitive tablet drawing.
 
 ## Run it as a local app
 
-Double-click `Start Inkboard.cmd`. It opens the board in a standalone Edge app window with no local server.
+Double-click `Start Inkboard.cmd`. It opens the board as a native local app window.
 
 ## Keep It On Top
 
-Run `Toggle Always On Top.cmd` to pin or unpin the Krakens Canvas window above other apps. If the board is not open yet, the toggle opens it first.
+Click `Pin` inside Krakens Canvas to keep the window above other apps. Click it again to unpin. You can also run `Toggle Always On Top.cmd` from the project folder.
+
+## Share Sketches With Codex
+
+Click `Share` to save the visible canvas to `shared/latest-canvas.png`. Turn on `Auto` to refresh that file after drawing. After sharing, ask Codex to look at the latest canvas.
 
 ## App icon
 
