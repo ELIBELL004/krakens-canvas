@@ -30,6 +30,10 @@ Click `Pin` inside Krakens Canvas to keep the window above other apps. Click it 
 
 Click `Share` to save the visible canvas to `shared/latest-canvas.png`. Turn on `Auto` to refresh that file after drawing. After sharing, ask Codex to look at the latest canvas.
 
+## Marketing
+
+Launch copy, social posts, and public README options live in `marketing/`.
+
 ## App icon
 
 Krakens Canvas uses `assets/icon.png` for its favicon/app icon. Save the mascot image there, then reopen the local app window.
