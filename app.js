@@ -50,8 +50,8 @@ const state = {
 };
 
 function uid() {
-  if (crypto && typeof crypto.randomUUID === "function") {
-    return crypto.randomUUID();
+  if (globalThis.crypto && typeof globalThis.crypto.randomUUID === "function") {
+    return globalThis.crypto.randomUUID();
   }
 
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
@@ -569,6 +569,7 @@ function movePointer(event) {
     page.view.y += event.clientY - state.lastPanPoint.y;
     state.lastPanPoint = { x: event.clientX, y: event.clientY };
     scheduleSave();
+    scheduleAutoShare();
     requestRender();
     return;
   }
@@ -679,6 +680,7 @@ function zoomAt(event) {
   page.view.y = screen.y - before.y * page.view.scale;
   deviceStatus.textContent = `${Math.round(page.view.scale * 100)}%`;
   scheduleSave();
+  scheduleAutoShare();
   requestRender();
 }
 
@@ -691,6 +693,7 @@ function addPage() {
   state.activePageId = page.id;
   renderPageTabs();
   scheduleSave();
+  scheduleAutoShare();
   requestRender();
 }
 
@@ -709,6 +712,7 @@ function renderPageTabs() {
       state.activePageId = page.id;
       renderPageTabs();
       scheduleSave();
+      scheduleAutoShare();
       requestRender();
     });
     pageTabs.append(button);
@@ -724,6 +728,7 @@ function clearPage() {
   state.redoStack.length = 0;
   updateHistoryButtons();
   scheduleSave();
+  scheduleAutoShare();
   requestRender();
 }
 
@@ -744,6 +749,7 @@ function undo() {
   state.redoStack.push(op);
   updateHistoryButtons();
   scheduleSave();
+  scheduleAutoShare();
   requestRender();
 }
 
@@ -764,6 +770,7 @@ function redo() {
   state.history.push(op);
   updateHistoryButtons();
   scheduleSave();
+  scheduleAutoShare();
   requestRender();
 }
 
@@ -838,16 +845,21 @@ autoShareToggle.addEventListener("change", () => {
 });
 gridInput.addEventListener("input", () => {
   scheduleSave();
+  scheduleAutoShare();
   requestRender();
 });
 gridToggle.addEventListener("change", () => {
   scheduleSave();
+  scheduleAutoShare();
   requestRender();
 });
 focusToggle.addEventListener("change", updateFocusMode);
 
 window.addEventListener("keydown", (event) => {
-  if (event.code === "Space") state.spaceDown = true;
+  if (event.code === "Space") {
+    state.spaceDown = true;
+    event.preventDefault();
+  }
 
   const mod = event.ctrlKey || event.metaKey;
   if (!mod) return;

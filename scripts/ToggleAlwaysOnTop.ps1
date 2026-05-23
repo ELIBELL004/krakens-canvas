@@ -43,7 +43,8 @@ public static class KrakensCanvasWindowTools
 }
 
 function Get-KrakensCanvasWindow {
-  Get-Process msedge,electron -ErrorAction SilentlyContinue |
+  @(Get-Process electron -ErrorAction SilentlyContinue) +
+    @(Get-Process msedge -ErrorAction SilentlyContinue) |
     Where-Object {
       $_.MainWindowHandle -ne 0 -and
       $_.MainWindowTitle -like "*Krakens Canvas*"
