@@ -16,6 +16,37 @@
           <span id="deviceStatus">Pointer ready</span>
         </div>
 
+        <details class="art-bar">
+          <summary>Art Bar</summary>
+          <div class="art-panel" role="menu" aria-label="Art Bar">
+            <div class="art-section">
+              <span class="art-label">Pages</span>
+              <div class="surface-options" role="group" aria-label="Page surface">
+                <button type="button" data-surface="black-grid">Grid</button>
+                <button type="button" data-surface="black-blank">Black</button>
+                <button type="button" data-surface="white-blank">White</button>
+                <button type="button" data-surface="sepia-blank">Sepia</button>
+              </div>
+            </div>
+
+            <label class="select-control">
+              <span>Brush</span>
+              <select id="brushSelect" aria-label="Brush style">
+                <option value="ink">Ink</option>
+                <option value="marker">Marker</option>
+                <option value="pencil">Pencil</option>
+                <option value="calligraphy">Calligraphy</option>
+                <option value="spray">Spray</option>
+              </select>
+            </label>
+
+            <label class="toggle-control theme-control">
+              <input id="themeToggle" type="checkbox">
+              <span>Light mode</span>
+            </label>
+          </div>
+        </details>
+
         <div class="page-control" aria-label="Pages">
           <div id="pageTabs" class="page-tabs" role="tablist" aria-label="Canvas pages"></div>
           <button id="addPageButton" type="button" aria-label="Add page">+</button>
@@ -92,6 +123,7 @@
       <section class="board-wrap" aria-label="Drawing board">
         <div id="board" class="board">
           <canvas id="inkCanvas" aria-label="Pressure-sensitive ink canvas"></canvas>
+          <div id="eraserCursor" aria-hidden="true"></div>
         </div>
       </section>
     </main>

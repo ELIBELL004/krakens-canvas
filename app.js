@@ -8,12 +8,14 @@ const inkCtx = inkLayer.getContext("2d", { alpha: true });
 
 const pageTabs = document.querySelector("#pageTabs");
 const addPageButton = document.querySelector("#addPageButton");
+const brushSelect = document.querySelector("#brushSelect");
 const sizeInput = document.querySelector("#sizeInput");
 const spillInput = document.querySelector("#spillInput");
 const smoothInput = document.querySelector("#smoothInput");
 const gridInput = document.querySelector("#gridInput");
 const gridToggle = document.querySelector("#gridToggle");
 const focusToggle = document.querySelector("#focusToggle");
+const themeToggle = document.querySelector("#themeToggle");
 const colorInput = document.querySelector("#colorInput");
 const pressureMeter = document.querySelector("#pressureMeter");
 const pressureValue = document.querySelector("#pressureValue");
@@ -25,15 +27,57 @@ const saveButton = document.querySelector("#saveButton");
 const pinButton = document.querySelector("#pinButton");
 const shareButton = document.querySelector("#shareButton");
 const autoShareToggle = document.querySelector("#autoShareToggle");
+const eraserCursor = document.querySelector("#eraserCursor");
 const toolButtons = Array.from(document.querySelectorAll("[data-tool]"));
+const surfaceButtons = Array.from(document.querySelectorAll("[data-surface]"));
 const swatchButtons = Array.from(document.querySelectorAll("[data-color]"));
 const toolbar = document.querySelector(".toolbar");
 const nativeApi = window.krakensNative;
 
 const defaultPalette = ["#f5f5f5", "#9fd3ff", "#ffc46b", "#ff8ca3", "#8ff0bf"];
+const defaultSurface = "black-grid";
+const surfaces = {
+  "black-grid": {
+    bg: "#050505",
+    grid: true,
+    line: "rgba(168, 168, 168, 0.28)",
+    lineStrong: "rgba(190, 190, 190, 0.5)",
+    name: "black grid",
+  },
+  "black-blank": {
+    bg: "#050505",
+    grid: false,
+    line: "rgba(168, 168, 168, 0.28)",
+    lineStrong: "rgba(190, 190, 190, 0.5)",
+    name: "blank black",
+  },
+  "white-blank": {
+    bg: "#f7f7f1",
+    grid: false,
+    line: "rgba(40, 40, 40, 0.18)",
+    lineStrong: "rgba(40, 40, 40, 0.3)",
+    name: "blank white",
+  },
+  "sepia-blank": {
+    bg: "#eee4cf",
+    grid: false,
+    line: "rgba(74, 58, 36, 0.16)",
+    lineStrong: "rgba(74, 58, 36, 0.28)",
+    name: "blank sepia",
+  },
+};
+
+const brushProfiles = {
+  ink: { alpha: 0.96, label: "ink", spill: true, width: 1 },
+  marker: { alpha: 0.46, label: "marker", spill: false, width: 1.85 },
+  pencil: { alpha: 0.42, label: "pencil", spill: false, width: 0.66 },
+  calligraphy: { alpha: 0.92, label: "calligraphy", spill: false, width: 1.12 },
+  spray: { alpha: 0.34, label: "spray", spill: true, width: 1.24 },
+};
 
 const state = {
   activePointerId: null,
+  brush: "ink",
   currentStroke: null,
   currentTool: "pen",
   drawing: false,
@@ -47,6 +91,7 @@ const state = {
   renderQueued: false,
   selectedPaletteIndex: 0,
   spaceDown: false,
+  theme: "dark",
 };
 
 function uid() {
@@ -57,10 +102,11 @@ function uid() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 }
 
-function createPage(index) {
+function createPage(index, options = {}) {
   return {
     id: uid(),
     name: `Page ${index}`,
+    surface: options.surface || defaultSurface,
     strokes: [],
     view: { x: 0, y: 0, scale: 1 },
   };
@@ -68,6 +114,16 @@ function createPage(index) {
 
 function activePage() {
   return state.pages.find((page) => page.id === state.activePageId) || state.pages[0];
+}
+
+function normalizePage(page, index) {
+  return {
+    id: page.id || uid(),
+    name: page.name || `Page ${index + 1}`,
+    surface: surfaces[page.surface] ? page.surface : defaultSurface,
+    strokes: Array.isArray(page.strokes) ? page.strokes : [],
+    view: page.view || { x: 0, y: 0, scale: 1 },
+  };
 }
 
 function loadState() {
@@ -80,7 +136,9 @@ function loadState() {
 
   try {
     const parsed = JSON.parse(saved);
-    state.pages = Array.isArray(parsed.pages) && parsed.pages.length ? parsed.pages : [createPage(1)];
+    state.pages = Array.isArray(parsed.pages) && parsed.pages.length
+      ? parsed.pages.map(normalizePage)
+      : [createPage(1)];
     state.activePageId = parsed.activePageId || state.pages[0].id;
     state.palette = Array.isArray(parsed.palette) && parsed.palette.length
       ? parsed.palette.slice(0, 5)
@@ -98,6 +156,10 @@ function loadState() {
     gridToggle.checked = settings.gridVisible !== false;
     focusToggle.checked = settings.focusMode === true;
     autoShareToggle.checked = settings.autoShare === true;
+    state.brush = brushProfiles[settings.brush] ? settings.brush : "ink";
+    state.theme = settings.theme === "light" ? "light" : "dark";
+    brushSelect.value = state.brush;
+    themeToggle.checked = state.theme === "light";
   } catch {
     state.pages = [createPage(1)];
     state.activePageId = state.pages[0].id;
@@ -125,6 +187,8 @@ function saveNow() {
       size: sizeInput.value,
       smooth: smoothInput.value,
       spill: spillInput.value,
+      brush: state.brush,
+      theme: state.theme,
     },
   };
 
@@ -232,7 +296,9 @@ function rgba(hex, alpha = 1) {
 function strokeWidth(stroke, pressure) {
   const shaped = Math.pow(Math.max(pressure, 0.08), 0.72);
   const multiplier = stroke.tool === "eraser" ? 1.8 : 1.45;
-  return stroke.baseSize * (0.22 + shaped * multiplier);
+  const profile = brushProfiles[stroke.brush] || brushProfiles.ink;
+  const brushWidth = stroke.tool === "eraser" ? 1 : profile.width;
+  return stroke.baseSize * brushWidth * (0.22 + shaped * multiplier);
 }
 
 function responsivePressure(pressure) {
@@ -249,13 +315,14 @@ function render() {
   state.renderQueued = false;
   const rect = getCanvasRect();
   const page = activePage();
+  const surface = surfaces[page.surface] || surfaces[defaultSurface];
 
   ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
-  ctx.fillStyle = "#050505";
+  ctx.fillStyle = surface.bg;
   ctx.fillRect(0, 0, rect.width, rect.height);
 
-  if (gridToggle.checked) {
-    drawGrid(ctx, rect.width, rect.height, page.view);
+  if (surface.grid && gridToggle.checked) {
+    drawGrid(ctx, rect.width, rect.height, page.view, surface);
   }
 
   inkCtx.setTransform(1, 0, 0, 1, 0, 0);
@@ -313,7 +380,7 @@ function scheduleAutoShare() {
   }, 400);
 }
 
-function drawGrid(targetCtx, width, height, view) {
+function drawGrid(targetCtx, width, height, view, surface = surfaces[defaultSurface]) {
   const grid = Number(gridInput.value);
   const major = grid * 4;
   const startX = Math.floor((-view.x / view.scale) / grid) * grid;
@@ -327,9 +394,7 @@ function drawGrid(targetCtx, width, height, view) {
   for (let x = startX; x <= endX; x += grid) {
     const screen = worldToScreen({ x, y: 0 }, view).x;
     const isMajor = Math.abs(Math.round(x / major) * major - x) < 0.01;
-    targetCtx.strokeStyle = isMajor
-      ? "rgba(190, 190, 190, 0.5)"
-      : "rgba(168, 168, 168, 0.28)";
+    targetCtx.strokeStyle = isMajor ? surface.lineStrong : surface.line;
     targetCtx.beginPath();
     targetCtx.moveTo(Math.round(screen) + 0.5, 0);
     targetCtx.lineTo(Math.round(screen) + 0.5, height);
@@ -339,9 +404,7 @@ function drawGrid(targetCtx, width, height, view) {
   for (let y = startY; y <= endY; y += grid) {
     const screen = worldToScreen({ x: 0, y }, view).y;
     const isMajor = Math.abs(Math.round(y / major) * major - y) < 0.01;
-    targetCtx.strokeStyle = isMajor
-      ? "rgba(190, 190, 190, 0.5)"
-      : "rgba(168, 168, 168, 0.28)";
+    targetCtx.strokeStyle = isMajor ? surface.lineStrong : surface.line;
     targetCtx.beginPath();
     targetCtx.moveTo(0, Math.round(screen) + 0.5);
     targetCtx.lineTo(width, Math.round(screen) + 0.5);
@@ -380,10 +443,11 @@ function drawStroke(targetCtx, stroke) {
 
 function drawFreehand(targetCtx, stroke) {
   const points = stroke.points;
+  const profile = brushProfiles[stroke.brush] || brushProfiles.ink;
   if (points.length === 1) {
     const point = points[0];
     const pressure = responsivePressure(point.pressure);
-    targetCtx.globalAlpha = stroke.tool === "eraser" ? 1 : Math.min(0.96, 0.68 + pressure * 0.28);
+    targetCtx.globalAlpha = stroke.tool === "eraser" ? 1 : Math.min(profile.alpha, profile.alpha * (0.62 + pressure * 0.38));
     targetCtx.beginPath();
     targetCtx.arc(point.x, point.y, strokeWidth(stroke, pressure) / 2, 0, Math.PI * 2);
     targetCtx.fill();
@@ -391,26 +455,118 @@ function drawFreehand(targetCtx, stroke) {
   }
 
   const pressure = responsivePressure(averagePressure(points));
-  targetCtx.globalAlpha = stroke.tool === "eraser" ? 1 : Math.min(0.96, 0.68 + pressure * 0.28);
+  targetCtx.globalAlpha = stroke.tool === "eraser" ? 1 : Math.min(profile.alpha, profile.alpha * (0.62 + pressure * 0.38));
   targetCtx.lineWidth = strokeWidth(stroke, pressure);
+
+  if (stroke.tool !== "eraser" && stroke.brush === "pencil") {
+    drawPencil(targetCtx, stroke, pressure);
+    return;
+  }
+
+  if (stroke.tool !== "eraser" && stroke.brush === "calligraphy") {
+    drawCalligraphy(targetCtx, stroke, pressure);
+    return;
+  }
+
+  if (stroke.tool !== "eraser" && stroke.brush === "spray") {
+    drawSprayCore(targetCtx, stroke, pressure);
+    return;
+  }
+
+  drawSmoothPath(targetCtx, points);
+  targetCtx.stroke();
+}
+
+function drawSmoothPath(targetCtx, points, offset = { x: 0, y: 0 }) {
   targetCtx.beginPath();
-  targetCtx.moveTo(points[0].x, points[0].y);
+  targetCtx.moveTo(points[0].x + offset.x, points[0].y + offset.y);
 
   if (points.length === 2) {
-    targetCtx.lineTo(points[1].x, points[1].y);
+    targetCtx.lineTo(points[1].x + offset.x, points[1].y + offset.y);
   } else {
     for (let i = 1; i < points.length - 1; i += 1) {
       const midpoint = {
         x: (points[i].x + points[i + 1].x) / 2,
         y: (points[i].y + points[i + 1].y) / 2,
       };
-      targetCtx.quadraticCurveTo(points[i].x, points[i].y, midpoint.x, midpoint.y);
+      targetCtx.quadraticCurveTo(
+        points[i].x + offset.x,
+        points[i].y + offset.y,
+        midpoint.x + offset.x,
+        midpoint.y + offset.y
+      );
     }
     const last = points[points.length - 1];
-    targetCtx.lineTo(last.x, last.y);
+    targetCtx.lineTo(last.x + offset.x, last.y + offset.y);
+  }
+}
+
+function drawPencil(targetCtx, stroke, pressure) {
+  const width = Math.max(0.7, strokeWidth(stroke, pressure));
+  targetCtx.lineWidth = width;
+  targetCtx.globalAlpha = 0.34 + pressure * 0.18;
+  drawSmoothPath(targetCtx, stroke.points);
+  targetCtx.stroke();
+
+  for (let i = 0; i < 3; i += 1) {
+    const wobble = seededUnit(stroke.id, i) * width * 0.38;
+    const angle = seededUnit(stroke.id, i + 10) * Math.PI * 2;
+    targetCtx.lineWidth = Math.max(0.45, width * (0.32 + i * 0.08));
+    targetCtx.globalAlpha = 0.08 + pressure * 0.06;
+    drawSmoothPath(targetCtx, stroke.points, {
+      x: Math.cos(angle) * wobble,
+      y: Math.sin(angle) * wobble,
+    });
+    targetCtx.stroke();
+  }
+}
+
+function drawCalligraphy(targetCtx, stroke, pressure) {
+  const points = stroke.points;
+  const width = strokeWidth(stroke, pressure);
+  targetCtx.save();
+  targetCtx.globalAlpha = 0.72 + pressure * 0.2;
+
+  for (let i = 1; i < points.length; i += 1) {
+    const from = points[i - 1];
+    const to = points[i];
+    const angle = Math.atan2(to.y - from.y, to.x - from.x);
+    const distance = Math.hypot(to.x - from.x, to.y - from.y);
+    const steps = Math.max(1, Math.ceil(distance / Math.max(width * 0.34, 1)));
+
+    for (let step = 0; step <= steps; step += 1) {
+      const t = step / steps;
+      const x = from.x + (to.x - from.x) * t;
+      const y = from.y + (to.y - from.y) * t;
+      const p = responsivePressure(from.pressure + (to.pressure - from.pressure) * t);
+      targetCtx.save();
+      targetCtx.translate(x, y);
+      targetCtx.rotate(angle + Math.PI / 4);
+      targetCtx.beginPath();
+      targetCtx.ellipse(0, 0, width * (0.22 + p * 0.26), width * (0.07 + p * 0.1), 0, 0, Math.PI * 2);
+      targetCtx.fill();
+      targetCtx.restore();
+    }
   }
 
+  targetCtx.restore();
+}
+
+function drawSprayCore(targetCtx, stroke, pressure) {
+  targetCtx.lineWidth = Math.max(1, strokeWidth(stroke, pressure) * 0.18);
+  targetCtx.globalAlpha = 0.1 + pressure * 0.1;
+  drawSmoothPath(targetCtx, stroke.points);
   targetCtx.stroke();
+}
+
+function seededUnit(seed, index) {
+  let hash = 2166136261;
+  const value = `${seed}:${index}`;
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return ((hash >>> 0) % 10000) / 10000;
 }
 
 function drawShape(targetCtx, stroke) {
@@ -452,11 +608,87 @@ function averagePressure(points) {
 function setTool(tool) {
   state.currentTool = tool;
   canvas.classList.toggle("is-panning", tool === "pan");
+  canvas.classList.toggle("is-erasing", tool === "eraser");
+  board.classList.toggle("is-erasing", tool === "eraser");
   toolButtons.forEach((button) => {
     const active = button.dataset.tool === tool;
     button.classList.toggle("is-active", active);
     button.setAttribute("aria-pressed", String(active));
   });
+  updateEraserCursor();
+}
+
+function setBrush(brush) {
+  state.brush = brushProfiles[brush] ? brush : "ink";
+  brushSelect.value = state.brush;
+  deviceStatus.textContent = `${brushProfiles[state.brush].label} brush`;
+  scheduleSave();
+}
+
+function setTheme(theme) {
+  state.theme = theme === "light" ? "light" : "dark";
+  themeToggle.checked = state.theme === "light";
+  document.body.classList.toggle("light-mode", state.theme === "light");
+  scheduleSave();
+}
+
+function setActiveSurface(surfaceKey) {
+  const page = activePage();
+  if (!page || !surfaces[surfaceKey]) return;
+
+  page.surface = surfaceKey;
+  maybeAdjustInkForSurface(surfaceKey);
+  updateSurfaceButtons();
+  deviceStatus.textContent = surfaces[surfaceKey].name;
+  scheduleSave();
+  scheduleAutoShare();
+  requestRender();
+}
+
+function maybeAdjustInkForSurface(surfaceKey) {
+  const lightSurface = surfaceKey === "white-blank" || surfaceKey === "sepia-blank";
+  const darkInk = "#151515";
+  const lightInk = "#f5f5f5";
+
+  if (lightSurface && state.inkColor.toLowerCase() === lightInk) {
+    setInkColor(darkInk, { updatePalette: true });
+  }
+
+  if (!lightSurface && state.inkColor.toLowerCase() === darkInk) {
+    setInkColor(lightInk, { updatePalette: true });
+  }
+}
+
+function updateSurfaceButtons() {
+  const page = activePage();
+  surfaceButtons.forEach((button) => {
+    const active = page && button.dataset.surface === page.surface;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+}
+
+function updateEraserCursor(event) {
+  if (state.currentTool !== "eraser") {
+    board.classList.remove("is-erasing");
+    return;
+  }
+
+  board.classList.add("is-erasing");
+  const page = activePage();
+  const rect = getCanvasRect();
+  const pressure = responsivePressure(0.5);
+  const size = strokeWidth(
+    { baseSize: Number(sizeInput.value) / page.view.scale, tool: "eraser" },
+    pressure
+  ) * page.view.scale;
+
+  eraserCursor.style.setProperty("--eraser-size", `${Math.max(10, size)}px`);
+
+  if (event) {
+    eraserCursor.style.setProperty("--eraser-x", `${event.clientX - rect.left}px`);
+    eraserCursor.style.setProperty("--eraser-y", `${event.clientY - rect.top}px`);
+  }
 }
 
 function setInkColor(color, options = {}) {
@@ -505,25 +737,35 @@ function addPointToStroke(stroke, event) {
 function maybeAddDrops(stroke, from, to) {
   if (!from || stroke.tool !== "pen") return;
 
+  const profile = brushProfiles[stroke.brush] || brushProfiles.ink;
   const spill = stroke.spill / 100;
   const pressure = Math.max(from.pressure, to.pressure, 0.08);
-  if (spill <= 0 || pressure < 0.64) return;
+  if (!profile.spill || spill <= 0) return;
+  if (stroke.brush !== "spray" && pressure < 0.64) return;
 
   const width = strokeWidth(stroke, pressure);
   const distance = Math.hypot(to.x - from.x, to.y - from.y);
-  const dropletCount = Math.floor(distance * spill * pressure * 0.1);
+  const dropletCount = stroke.brush === "spray"
+    ? Math.floor(distance * (3 + spill * 9) * (0.35 + pressure))
+    : Math.floor(distance * spill * pressure * 0.1);
 
   for (let i = 0; i < dropletCount; i += 1) {
     const t = Math.random();
     const centerX = from.x + (to.x - from.x) * t;
     const centerY = from.y + (to.y - from.y) * t;
-    const sprayRadius = width * (0.45 + pressure * 1.7) * spill;
+    const sprayRadius = stroke.brush === "spray"
+      ? width * (1.2 + spill * 2.4)
+      : width * (0.45 + pressure * 1.7) * spill;
     const angle = Math.random() * Math.PI * 2;
     const radius = Math.random() * sprayRadius;
 
     stroke.drops.push({
-      alpha: Math.min(0.34, 0.04 + pressure * spill * 0.22),
-      radius: Math.max(0.45, width * (0.018 + Math.random() * 0.046) * pressure),
+      alpha: stroke.brush === "spray"
+        ? Math.min(0.22, 0.035 + pressure * 0.11)
+        : Math.min(0.34, 0.04 + pressure * spill * 0.22),
+      radius: stroke.brush === "spray"
+        ? Math.max(0.35, width * (0.015 + Math.random() * 0.036) * pressure)
+        : Math.max(0.45, width * (0.018 + Math.random() * 0.046) * pressure),
       x: centerX + Math.cos(angle) * radius,
       y: centerY + Math.sin(angle) * radius,
     });
@@ -548,6 +790,7 @@ function startPointer(event) {
   state.currentStroke = {
     id: uid(),
     baseSize: Number(sizeInput.value) / page.view.scale,
+    brush: state.brush,
     color: state.inkColor,
     drops: [],
     points: [],
@@ -561,6 +804,8 @@ function startPointer(event) {
 }
 
 function movePointer(event) {
+  updateEraserCursor(event);
+
   if (event.pointerId !== state.activePointerId) return;
 
   if (state.lastPanPoint) {
@@ -685,13 +930,17 @@ function zoomAt(event) {
 }
 
 function addPage() {
-  const page = createPage(state.pages.length + 1);
+  const current = activePage();
+  const page = createPage(state.pages.length + 1, {
+    surface: current ? current.surface : defaultSurface,
+  });
   const rect = getCanvasRect();
   page.view.x = rect.width / 2;
   page.view.y = rect.height / 2;
   state.pages.push(page);
   state.activePageId = page.id;
   renderPageTabs();
+  updateSurfaceButtons();
   scheduleSave();
   scheduleAutoShare();
   requestRender();
@@ -711,6 +960,7 @@ function renderPageTabs() {
     button.addEventListener("click", () => {
       state.activePageId = page.id;
       renderPageTabs();
+      updateSurfaceButtons();
       scheduleSave();
       scheduleAutoShare();
       requestRender();
@@ -797,6 +1047,13 @@ toolButtons.forEach((button) => {
   button.addEventListener("click", () => setTool(button.dataset.tool));
 });
 
+surfaceButtons.forEach((button) => {
+  button.addEventListener("click", () => setActiveSurface(button.dataset.surface));
+});
+
+brushSelect.addEventListener("change", () => setBrush(brushSelect.value));
+themeToggle.addEventListener("change", () => setTheme(themeToggle.checked ? "light" : "dark"));
+
 swatchButtons.forEach((button, index) => {
   button.addEventListener("click", () => {
     state.selectedPaletteIndex = index;
@@ -806,8 +1063,16 @@ swatchButtons.forEach((button, index) => {
 
 colorInput.addEventListener("input", () => setInkColor(colorInput.value, { updatePalette: true }));
 addPageButton.addEventListener("click", addPage);
+sizeInput.addEventListener("input", () => {
+  updateEraserCursor();
+  scheduleSave();
+});
+spillInput.addEventListener("input", scheduleSave);
+smoothInput.addEventListener("input", scheduleSave);
 canvas.addEventListener("pointerdown", startPointer);
 canvas.addEventListener("pointermove", movePointer);
+canvas.addEventListener("pointerenter", updateEraserCursor);
+canvas.addEventListener("pointerleave", () => board.classList.remove("is-erasing"));
 canvas.addEventListener("pointerup", endPointer);
 canvas.addEventListener("pointercancel", endPointer);
 canvas.addEventListener("wheel", zoomAt, { passive: false });
@@ -844,6 +1109,7 @@ autoShareToggle.addEventListener("change", () => {
   }
 });
 gridInput.addEventListener("input", () => {
+  updateEraserCursor();
   scheduleSave();
   scheduleAutoShare();
   requestRender();
@@ -891,8 +1157,12 @@ window.addEventListener("beforeunload", saveNow);
 
 loadState();
 renderPalette();
+setTheme(state.theme);
+setBrush(state.brush);
 setInkColor(state.inkColor);
 renderPageTabs();
+updateSurfaceButtons();
+setTool(state.currentTool);
 updateFocusMode();
 resizeCanvas();
 updateHistoryButtons();

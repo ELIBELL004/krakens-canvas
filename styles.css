@@ -12,6 +12,16 @@
   --grid-size: 28px;
 }
 
+body.light-mode {
+  color-scheme: light;
+  --bg: #f1f1ee;
+  --panel: rgba(248, 248, 245, 0.94);
+  --panel-border: rgba(20, 20, 20, 0.16);
+  --text: #151515;
+  --muted: #5f5f59;
+  --accent: #151515;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -44,11 +54,14 @@ body.focus-mode .toolbar.is-peeking {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
-button {
+button,
+select,
+summary {
   min-height: 34px;
   border: 1px solid var(--panel-border);
   border-radius: 7px;
@@ -59,10 +72,22 @@ button {
 }
 
 button:hover:not(:disabled),
-button:focus-visible {
+button:focus-visible,
+select:focus-visible,
+summary:hover,
+summary:focus-visible {
   border-color: rgba(255, 255, 255, 0.48);
   background: rgba(255, 255, 255, 0.14);
   outline: none;
+}
+
+body.light-mode button:hover:not(:disabled),
+body.light-mode button:focus-visible,
+body.light-mode select:focus-visible,
+body.light-mode summary:hover,
+body.light-mode summary:focus-visible {
+  border-color: rgba(0, 0, 0, 0.42);
+  background: rgba(0, 0, 0, 0.08);
 }
 
 button:disabled {
@@ -109,6 +134,8 @@ button:disabled {
 }
 
 .brand span,
+.art-label,
+.select-control span,
 .slider-control span,
 .ink-control > span,
 .toggle-control span,
@@ -117,6 +144,95 @@ button:disabled {
   color: var(--muted);
   font-size: 0.76rem;
   line-height: 1;
+}
+
+.art-bar {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.art-bar summary {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 700;
+  list-style: none;
+}
+
+.art-bar summary::-webkit-details-marker {
+  display: none;
+}
+
+.art-bar summary::after {
+  margin-left: 8px;
+  color: var(--muted);
+  content: "v";
+  font-size: 0.72rem;
+}
+
+.art-bar[open] summary {
+  border-color: rgba(255, 255, 255, 0.62);
+  background: var(--accent);
+  color: #111;
+}
+
+body.light-mode .art-bar[open] summary {
+  color: #fff;
+}
+
+.art-panel {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 9px);
+  left: 0;
+  display: grid;
+  width: min(320px, calc(100vw - 28px));
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(18px);
+}
+
+.art-section,
+.select-control {
+  display: grid;
+  gap: 8px;
+}
+
+.surface-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.surface-options button {
+  min-width: 0;
+  padding: 0 7px;
+}
+
+.surface-options button.is-active,
+.tool-button.is-active,
+.page-tab.is-active,
+#pinButton.is-active,
+#shareButton.is-active {
+  border-color: rgba(255, 255, 255, 0.62);
+  background: var(--accent);
+  color: #111;
+}
+
+body.light-mode .surface-options button.is-active,
+body.light-mode .tool-button.is-active,
+body.light-mode .page-tab.is-active,
+body.light-mode #pinButton.is-active,
+body.light-mode #shareButton.is-active {
+  color: #fff;
+}
+
+.select-control select {
+  width: 100%;
 }
 
 .page-control {
@@ -145,12 +261,6 @@ button:disabled {
   white-space: nowrap;
 }
 
-.page-tab.is-active {
-  border-color: rgba(255, 255, 255, 0.62);
-  background: var(--accent);
-  color: #111;
-}
-
 #addPageButton {
   width: 34px;
   min-width: 34px;
@@ -162,19 +272,6 @@ button:disabled {
   flex: 0 0 auto;
   align-items: center;
   gap: 6px;
-}
-
-.tool-button.is-active {
-  border-color: rgba(255, 255, 255, 0.62);
-  background: var(--accent);
-  color: #111;
-}
-
-#pinButton.is-active,
-#shareButton.is-active {
-  border-color: rgba(255, 255, 255, 0.62);
-  background: var(--accent);
-  color: #111;
 }
 
 .slider-control {
@@ -292,6 +389,35 @@ button:disabled {
   cursor: grab;
 }
 
+#inkCanvas.is-erasing {
+  cursor: none;
+}
+
+#eraserCursor {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  display: none;
+  width: var(--eraser-size, 36px);
+  height: var(--eraser-size, 36px);
+  border: 2px solid rgba(255, 255, 255, 0.86);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.68),
+    0 0 18px rgba(255, 255, 255, 0.16);
+  mix-blend-mode: difference;
+  pointer-events: none;
+  transform: translate(
+    calc(var(--eraser-x, -999px) - var(--eraser-size, 36px) / 2),
+    calc(var(--eraser-y, -999px) - var(--eraser-size, 36px) / 2)
+  );
+}
+
+.board.is-erasing #eraserCursor {
+  display: block;
+}
+
 @media (max-width: 900px) {
   body {
     overflow: auto;
@@ -310,6 +436,16 @@ button:disabled {
 
   .brand {
     width: 100%;
+  }
+
+  .art-bar {
+    position: static;
+  }
+
+  .art-panel {
+    right: 10px;
+    left: 10px;
+    width: auto;
   }
 
   .board-wrap {
