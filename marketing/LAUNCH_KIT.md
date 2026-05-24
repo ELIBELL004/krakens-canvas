@@ -4,7 +4,7 @@
 
 Krakens Canvas is a local black-grid whiteboard for people who think better with a pen.
 
-It is built around pressure-sensitive Wacom input, a minimalist dark canvas, always-on-top pinning, and a Codex sharing bridge that lets sketches become conversational context.
+It is built around pressure-sensitive stylus input, a minimalist dark canvas, always-on-top pinning, and a Codex sharing bridge that lets sketches become conversational context.
 
 ## One-Liner
 
@@ -12,11 +12,11 @@ A local pressure-sensitive black-grid canvas for sketching ideas directly into y
 
 ## Short Description
 
-Krakens Canvas is a minimalist local whiteboard for Wacom-style thinking: dark grid, pressure-sensitive ink, infinite canvas, journal pages, always-on-top mode, and a one-click way to share your current sketch with Codex.
+Krakens Canvas is a minimalist local whiteboard for stylus-first thinking: dark grid, pressure-sensitive ink, infinite canvas, journal pages, always-on-top mode, and a one-click way to share your current sketch with Codex.
 
 ## Longer Description
 
-Krakens Canvas started as a personal thinking surface: a black-grid board that feels good with a Wacom pen. It supports pressure-sensitive ink, adjustable smoothing and spill, infinite pan and zoom, page tabs, autosave, focus mode, and shape assist.
+Krakens Canvas started as a personal thinking surface: a black-grid board that feels good with a drawing tablet. It supports pressure-sensitive ink, adjustable smoothing and spill, infinite pan and zoom, page tabs, autosave, focus mode, and shape assist.
 
 The niche twist is the Codex bridge. Click `Share` or turn on `Auto`, and Krakens Canvas writes the visible board to `shared/latest-canvas.png`, so Codex can inspect what you drew and respond to diagrams, handwritten notes, or rough visual ideas.
 
@@ -41,7 +41,7 @@ It is local-first, lightweight, and intentionally not a giant design suite.
 
 ## Feature Bullets
 
-- Pressure-sensitive ink for Wacom/tablet input.
+- Pressure-sensitive ink for drawing tablet input.
 - Black canvas with adjustable grey grid.
 - Infinite pan and zoom.
 - Journal-style page tabs.
@@ -63,14 +63,14 @@ It is local-first, lightweight, and intentionally not a giant design suite.
 
 ## GitHub Repository Description
 
-Local pressure-sensitive black-grid whiteboard with Wacom ink, always-on-top pinning, and Codex sketch sharing.
+Local pressure-sensitive black-grid whiteboard with pressure-sensitive ink, always-on-top pinning, and Codex sketch sharing.
 
 ## GitHub Topics
 
 ```text
 electron
 whiteboard
-wacom
+stylus
 canvas
 drawing
 stylus
@@ -86,7 +86,7 @@ local-first
 
 Built a tiny local app called Krakens Canvas.
 
-Black-grid whiteboard, Wacom pressure ink, infinite canvas, always-on-top mode, and a button that lets Codex inspect what I just drew.
+Black-grid whiteboard, pressure-sensitive ink, infinite canvas, always-on-top mode, and a button that lets Codex inspect what I just drew.
 
 It is weirdly exactly how I wanted to think.
 
@@ -94,7 +94,7 @@ It is weirdly exactly how I wanted to think.
 
 Krakens Canvas is my local sketch surface for AI-assisted thinking:
 
-- pressure-sensitive Wacom ink
+- pressure-sensitive pressure-sensitive ink
 - black-grid infinite canvas
 - always-on-top pinning
 - autosave + pages
@@ -104,7 +104,7 @@ The goal: explain ideas by drawing them, then have the AI actually see the sketc
 
 ### Builder Post
 
-Made a personal whiteboard app because I wanted something darker, quieter, and more Wacom-native than a normal web whiteboard.
+Made a personal whiteboard app because I wanted something darker, quieter, and more drawing-tablet-native than a normal web whiteboard.
 
 The fun part: it saves the visible canvas as `latest-canvas.png`, so Codex can look at my diagrams or handwriting when I ask what I drew.
 
@@ -112,7 +112,7 @@ The fun part: it saves the visible canvas as `latest-canvas.png`, so Codex can l
 
 I may have accidentally built my favorite little thinking tool.
 
-It is called Krakens Canvas. It is basically a black-grid Wacom whiteboard that can pin above Discord/code/etc and let Codex read my sketches.
+It is called Krakens Canvas. It is basically a black-grid drawing tablet whiteboard that can pin above Discord/code/etc and let Codex read my sketches.
 
 ## Product Hunt / Indie Hackers Blurb
 
@@ -125,7 +125,7 @@ Krakens Canvas is a local-first sketching app for visual thinkers. It gives you 
 
 Draw the thought before it becomes a sentence.
 
-Krakens Canvas is a local pressure-sensitive black-grid whiteboard for tablet-first thinking. It supports Wacom-style ink, infinite canvas pages, always-on-top pinning, and a Codex sharing bridge so your sketches can become conversational context.
+Krakens Canvas is a local pressure-sensitive black-grid whiteboard for tablet-first thinking. It supports pressure-sensitive ink, infinite canvas pages, always-on-top pinning, and a Codex sharing bridge so your sketches can become conversational context.
 ```
 
 ## First Launch Checklist
@@ -151,6 +151,6 @@ Krakens Canvas is a local pressure-sensitive black-grid whiteboard for tablet-fi
 
 - Current build is Windows-focused.
 - Native app uses Electron.
-- Wacom pressure depends on the OS/browser stack; Windows Ink may matter.
+- Stylus pressure depends on the OS/browser stack; Windows Ink may matter.
 - The Codex bridge works by writing a local PNG, not live streaming.
 - The app is a prototype, not a polished commercial release yet.

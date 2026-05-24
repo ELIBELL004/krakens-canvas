@@ -2,7 +2,7 @@
 
 ## Post 1: Origin
 
-I built Krakens Canvas because I wanted a darker, quieter whiteboard that felt right with a Wacom pen.
+I built Krakens Canvas because I wanted a darker, quieter whiteboard that felt right with a drawing tablet.
 
 It is local, pressure-sensitive, and intentionally minimal: black grid, smooth ink, page tabs, infinite canvas, and a pin mode so it can sit above whatever I am working on.
 

@@ -7,11 +7,11 @@ Use this when you are ready for the GitHub repo to read less like internal notes
 
 Draw the thought before it becomes a sentence.
 
-Krakens Canvas is a local pressure-sensitive black-grid whiteboard for tablet-first thinking. It supports Wacom-style ink, infinite canvas pages, always-on-top pinning, and a Codex sharing bridge so your sketches can become conversational context.
+Krakens Canvas is a local pressure-sensitive black-grid whiteboard for tablet-first thinking. It supports pressure-sensitive ink, infinite canvas pages, always-on-top pinning, and a Codex sharing bridge so your sketches can become conversational context.
 
 ## Highlights
 
-- Pressure-sensitive pen input for Wacom/tablet drawing.
+- Pressure-sensitive pen input for stylus/tablet drawing.
 - Minimal black canvas with adjustable grey grid.
 - Infinite pan and zoom.
 - Journal-style page tabs.

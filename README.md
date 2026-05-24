@@ -5,7 +5,7 @@ A small local whiteboard prototype for pressure-sensitive tablet drawing.
 ## What it does
 
 - Black drawing surface with adjustable grey grid lines.
-- Wacom/stylus pressure controls stroke width, opacity, and ink spill.
+- Stylus pressure controls stroke width, opacity, and ink spill.
 - Mouse fallback uses a fixed active pressure, so the prototype still works without a tablet.
 - Pen and eraser tools.
 - Infinite pan/zoom canvas.
@@ -42,7 +42,7 @@ Krakens Canvas uses `assets/icon.png` for its favicon/app icon. Save the mascot 
 
 Open `index.html` in a browser, or serve the folder with any static web server if you want a normal browser tab.
 
-For Wacom tablets on Windows, keep Windows Ink enabled if browser pressure is not showing up. The app uses the browser Pointer Events pressure value.
+For drawing tablets on Windows, keep Windows Ink enabled if browser pressure is not showing up. The app uses the browser Pointer Events pressure value.
 
 ## Notes from quick research
 
