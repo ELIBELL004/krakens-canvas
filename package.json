@@ -4,7 +4,8 @@
   "description": "A local pressure-sensitive whiteboard for sketching ideas.",
   "main": "main.cjs",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "site": "python -m http.server 4174 --bind 127.0.0.1"
   },
   "devDependencies": {
     "electron": "^42.2.0"

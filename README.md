@@ -32,7 +32,7 @@ Click `Share` to save the visible canvas to `shared/latest-canvas.png`. Turn on 
 
 ## Marketing
 
-Launch copy, social posts, and public README options live in `marketing/`.
+Launch copy, social posts, and public README options live in `marketing/`. A first-pass landing page lives in `site/`.
 
 ## App icon
 

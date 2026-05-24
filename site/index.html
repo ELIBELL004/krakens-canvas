@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Krakens Canvas - Local ink for visual thinkers</title>
+    <meta
+      name="description"
+      content="Krakens Canvas is a free local black-grid whiteboard with pressure-sensitive ink, always-on-top pinning, and Codex sketch sharing."
+    >
+    <link rel="icon" type="image/png" href="../assets/icon.png">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <canvas id="fieldCanvas" aria-hidden="true"></canvas>
+
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Krakens Canvas home">
+        <img src="../assets/icon.png" alt="">
+        <span>Krakens Canvas</span>
+      </a>
+      <nav aria-label="Primary">
+        <a href="#download">Download</a>
+        <a href="#workflow">Workflow</a>
+        <a href="#donate">Donate</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-label="Krakens Canvas">
+        <div class="hero-copy">
+          <p class="eyebrow">Free local whiteboard for Wacom-first thinking</p>
+          <h1>Krakens Canvas</h1>
+          <p class="lede">
+            Draw the thought before it becomes a sentence. A black-grid canvas
+            with pressure-sensitive ink, always-on-top pinning, and a bridge for
+            sharing sketches with Codex.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#download">Download free</a>
+            <a class="button ghost" href="#donate">Support with Stripe</a>
+          </div>
+        </div>
+
+        <div class="product-stage" aria-label="Product preview">
+          <div class="app-window">
+            <div class="window-bar">
+              <div>
+                <strong>Krakens Canvas</strong>
+                <span>autosaved</span>
+              </div>
+              <div class="window-actions">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+            <div class="window-board">
+              <img class="mascot" src="../assets/icon.png" alt="Krakens Canvas mascot">
+              <svg viewBox="0 0 620 360" role="img" aria-label="Preview sketch on Krakens Canvas">
+                <path class="ink amber" d="M73 202 C118 146 144 97 156 60" />
+                <path class="ink amber" d="M121 166 C184 174 239 130 230 89 C224 56 174 145 170 217" />
+                <path class="ink amber" d="M218 178 C267 178 300 161 310 147 C323 129 259 138 249 177 C241 205 315 201 337 171" />
+                <path class="ink amber" d="M369 155 L369 205 M391 155 L391 205" />
+                <path class="ink amber" d="M429 169 C463 129 498 153 486 188 C474 224 422 209 429 169" />
+                <path class="ink amber" d="M523 134 L523 195 M523 225 L523 233" />
+                <path class="ink rose" d="M415 265 L460 250 L497 282 L495 222 L531 185 L480 187 L451 141 L439 196 L390 211 L432 232 Z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="strip" aria-label="Principles">
+        <div>
+          <span>01</span>
+          <strong>Free to use</strong>
+          <p>Download it, open it, draw. No account wall.</p>
+        </div>
+        <div>
+          <span>02</span>
+          <strong>Local first</strong>
+          <p>Your canvas lives on your machine.</p>
+        </div>
+        <div>
+          <span>03</span>
+          <strong>Donation supported</strong>
+          <p>Stripe donations are optional, never a feature gate.</p>
+        </div>
+      </section>
+
+      <section id="download" class="section two-col">
+        <div>
+          <p class="eyebrow">Download</p>
+          <h2>Get to work without a ceremony.</h2>
+        </div>
+        <div class="panel">
+          <p>
+            The current build is a Windows-focused local Electron app. The next
+            packaging step is a clean installer, but the project already runs
+            locally from the included launcher.
+          </p>
+          <div class="download-row">
+            <a class="button primary" href="../Start%20Inkboard.cmd" download>Download launcher</a>
+            <a class="button ghost" href="https://github.com/ELIBELL004/krakens-canvas">View GitHub</a>
+          </div>
+          <code>Start Inkboard.cmd</code>
+        </div>
+      </section>
+
+      <section id="workflow" class="section">
+        <div class="section-heading">
+          <p class="eyebrow">Workflow</p>
+          <h2>Sketch, pin, share, continue.</h2>
+        </div>
+        <div class="feature-grid">
+          <article>
+            <span>Pressure</span>
+            <h3>Ink that reacts to your hand.</h3>
+            <p>Wacom-style pressure changes the character of each stroke.</p>
+          </article>
+          <article>
+            <span>Pin</span>
+            <h3>Keep the board above the noise.</h3>
+            <p>Pin Krakens Canvas while Discord, notes, or code sit underneath.</p>
+          </article>
+          <article>
+            <span>Share</span>
+            <h3>Let Codex inspect the idea.</h3>
+            <p>Share the current canvas as a local image when words are slower.</p>
+          </article>
+          <article>
+            <span>Flow</span>
+            <h3>Pages, pan, zoom, autosave.</h3>
+            <p>Move around the thought without babysitting the tool.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="donate" class="section donate">
+        <div>
+          <p class="eyebrow">Support</p>
+          <h2>Free app. Optional thanks.</h2>
+          <p>
+            Krakens Canvas is intended to stay free to use. Donations are for
+            people who want to support the project, not unlock the project.
+          </p>
+        </div>
+        <div class="donate-card">
+          <span>Stripe donation link</span>
+          <p>Add your Stripe Payment Link here when ready.</p>
+          <a
+            id="donateButton"
+            class="button primary disabled"
+            href="#"
+            aria-disabled="true"
+          >Coming soon</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Krakens Canvas</span>
+      <span>Local ink for visual thinkers.</span>
+    </footer>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
