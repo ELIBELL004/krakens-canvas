@@ -14,8 +14,8 @@
 
 body.light-mode {
   color-scheme: light;
-  --bg: #f1f1ee;
-  --panel: rgba(248, 248, 245, 0.94);
+  --bg: #e8e7df;
+  --panel: rgba(238, 237, 230, 0.95);
   --panel-border: rgba(20, 20, 20, 0.16);
   --text: #151515;
   --muted: #5f5f59;
@@ -69,6 +69,18 @@ summary {
   background: rgba(255, 255, 255, 0.08);
   color: var(--text);
   cursor: pointer;
+}
+
+select,
+option {
+  background: #141414;
+  color: var(--text);
+}
+
+body.light-mode select,
+body.light-mode option {
+  background: #f1f0e9;
+  color: var(--text);
 }
 
 button:hover:not(:disabled),

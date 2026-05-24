@@ -24,4 +24,4 @@ https://buy.stripe.com/9B6fZgcAodvb0wT5n4ak000
 
 ## Download Button
 
-The download button points to the GitHub `v0.2.0` release ZIP. The repository must be public, or the visitor must have repository access, for the download to work.
+The download button points to the GitHub `v0.2.1` release ZIP. The repository must be public, or the visitor must have repository access, for the download to work.

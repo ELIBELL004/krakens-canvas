@@ -3,6 +3,8 @@ const STORAGE_KEY = "krakens-canvas-v2";
 const board = document.querySelector("#board");
 const canvas = document.querySelector("#inkCanvas");
 const ctx = canvas.getContext("2d", { alpha: false });
+const staticLayer = document.createElement("canvas");
+const staticCtx = staticLayer.getContext("2d", { alpha: true });
 const inkLayer = document.createElement("canvas");
 const inkCtx = inkLayer.getContext("2d", { alpha: true });
 
@@ -34,7 +36,8 @@ const swatchButtons = Array.from(document.querySelectorAll("[data-color]"));
 const toolbar = document.querySelector(".toolbar");
 const nativeApi = window.krakensNative;
 
-const defaultPalette = ["#f5f5f5", "#9fd3ff", "#ffc46b", "#ff8ca3", "#8ff0bf"];
+const legacyPalette = ["#f5f5f5", "#9fd3ff", "#ffc46b", "#ff8ca3", "#8ff0bf"];
+const defaultPalette = ["#e2e0da", "#86adc4", "#c99d5d", "#c9667c", "#78b690"];
 const defaultSurface = "black-grid";
 const surfaces = {
   "black-grid": {
@@ -52,14 +55,14 @@ const surfaces = {
     name: "blank black",
   },
   "white-blank": {
-    bg: "#f7f7f1",
+    bg: "#ecece6",
     grid: false,
     line: "rgba(40, 40, 40, 0.18)",
     lineStrong: "rgba(40, 40, 40, 0.3)",
     name: "blank white",
   },
   "sepia-blank": {
-    bg: "#eee4cf",
+    bg: "#ddd2b9",
     grid: false,
     line: "rgba(74, 58, 36, 0.16)",
     lineStrong: "rgba(74, 58, 36, 0.28)",
@@ -68,16 +71,17 @@ const surfaces = {
 };
 
 const brushProfiles = {
-  ink: { alpha: 0.96, label: "ink", spill: true, width: 1 },
-  marker: { alpha: 0.46, label: "marker", spill: false, width: 1.85 },
-  pencil: { alpha: 0.42, label: "pencil", spill: false, width: 0.66 },
-  calligraphy: { alpha: 0.92, label: "calligraphy", spill: false, width: 1.12 },
-  spray: { alpha: 0.34, label: "spray", spill: true, width: 1.24 },
+  ink: { alpha: 0.9, label: "ink", maxWidth: 58, spill: true, width: 1 },
+  marker: { alpha: 0.34, label: "marker", maxWidth: 54, spill: false, width: 1.65 },
+  pencil: { alpha: 0.34, label: "pencil", maxWidth: 26, spill: false, width: 0.6 },
+  calligraphy: { alpha: 0.84, label: "calligraphy", maxWidth: 36, spill: false, width: 1.02 },
+  spray: { alpha: 0.24, label: "spray", maxWidth: 34, spill: true, width: 1.08 },
 };
 
 const state = {
   activePointerId: null,
   brush: "ink",
+  canvasRect: null,
   currentStroke: null,
   currentTool: "pen",
   drawing: false,
@@ -91,6 +95,7 @@ const state = {
   renderQueued: false,
   selectedPaletteIndex: 0,
   spaceDown: false,
+  staticLayerDirty: true,
   theme: "dark",
 };
 
@@ -140,10 +145,8 @@ function loadState() {
       ? parsed.pages.map(normalizePage)
       : [createPage(1)];
     state.activePageId = parsed.activePageId || state.pages[0].id;
-    state.palette = Array.isArray(parsed.palette) && parsed.palette.length
-      ? parsed.palette.slice(0, 5)
-      : [...defaultPalette];
-    state.inkColor = parsed.inkColor || state.palette[0];
+    state.palette = normalizePalette(parsed.palette);
+    state.inkColor = remapLegacyColor(parsed.inkColor || state.palette[0]);
     state.selectedPaletteIndex = Number.isInteger(parsed.selectedPaletteIndex)
       ? Math.min(Math.max(parsed.selectedPaletteIndex, 0), state.palette.length - 1)
       : 0;
@@ -220,14 +223,21 @@ function updatePinButton(isPinned) {
 }
 
 function getCanvasRect() {
-  return canvas.getBoundingClientRect();
+  if (!state.canvasRect) {
+    state.canvasRect = canvas.getBoundingClientRect();
+  }
+
+  return state.canvasRect;
 }
 
 function resizeCanvas() {
+  state.canvasRect = canvas.getBoundingClientRect();
   const rect = getCanvasRect();
   state.dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 3));
   canvas.width = Math.max(1, Math.round(rect.width * state.dpr));
   canvas.height = Math.max(1, Math.round(rect.height * state.dpr));
+  staticLayer.width = canvas.width;
+  staticLayer.height = canvas.height;
   inkLayer.width = canvas.width;
   inkLayer.height = canvas.height;
 
@@ -239,6 +249,7 @@ function resizeCanvas() {
     }
   });
 
+  invalidateStaticLayer();
   requestRender();
 }
 
@@ -293,12 +304,39 @@ function rgba(hex, alpha = 1) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+function remapLegacyColor(color) {
+  const index = legacyPalette.findIndex((item) => item.toLowerCase() === String(color).toLowerCase());
+  return index >= 0 ? defaultPalette[index] : color;
+}
+
+function normalizePalette(palette) {
+  const source = Array.isArray(palette) && palette.length ? palette : defaultPalette;
+  return defaultPalette.map((fallback, index) => remapLegacyColor(source[index] || fallback));
+}
+
 function strokeWidth(stroke, pressure) {
   const shaped = Math.pow(Math.max(pressure, 0.08), 0.72);
   const multiplier = stroke.tool === "eraser" ? 1.8 : 1.45;
   const profile = brushProfiles[stroke.brush] || brushProfiles.ink;
   const brushWidth = stroke.tool === "eraser" ? 1 : profile.width;
-  return stroke.baseSize * brushWidth * (0.22 + shaped * multiplier);
+  const width = stroke.baseSize * brushWidth * (0.22 + shaped * multiplier);
+  return stroke.tool === "eraser" ? width : Math.min(width, profile.maxWidth);
+}
+
+function pointSpacing(stroke) {
+  if (stroke.tool === "eraser") {
+    return Math.max(0.7, Math.min(2.4, stroke.baseSize * 0.04));
+  }
+
+  if (stroke.brush === "spray") {
+    return Math.max(1.2, Math.min(3.4, stroke.baseSize * 0.06));
+  }
+
+  if (stroke.brush === "pencil") {
+    return Math.max(0.5, Math.min(1.8, stroke.baseSize * 0.03));
+  }
+
+  return Math.max(0.65, Math.min(2.8, stroke.baseSize * 0.045));
 }
 
 function responsivePressure(pressure) {
@@ -309,6 +347,22 @@ function requestRender() {
   if (state.renderQueued) return;
   state.renderQueued = true;
   requestAnimationFrame(render);
+}
+
+function invalidateStaticLayer() {
+  state.staticLayerDirty = true;
+}
+
+function rebuildStaticLayer(page) {
+  staticCtx.setTransform(1, 0, 0, 1, 0, 0);
+  staticCtx.clearRect(0, 0, staticLayer.width, staticLayer.height);
+  staticCtx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+  staticCtx.lineCap = "round";
+  staticCtx.lineJoin = "round";
+  staticCtx.translate(page.view.x, page.view.y);
+  staticCtx.scale(page.view.scale, page.view.scale);
+  page.strokes.forEach((stroke) => drawStroke(staticCtx, stroke));
+  state.staticLayerDirty = false;
 }
 
 function render() {
@@ -325,18 +379,33 @@ function render() {
     drawGrid(ctx, rect.width, rect.height, page.view, surface);
   }
 
+  if (state.staticLayerDirty) {
+    rebuildStaticLayer(page);
+  }
+
+  if (!state.currentStroke) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(staticLayer, 0, 0);
+    return;
+  }
+
   inkCtx.setTransform(1, 0, 0, 1, 0, 0);
   inkCtx.clearRect(0, 0, inkLayer.width, inkLayer.height);
+  if (state.currentStroke.tool === "eraser") {
+    inkCtx.drawImage(staticLayer, 0, 0);
+  }
   inkCtx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
   inkCtx.lineCap = "round";
   inkCtx.lineJoin = "round";
   inkCtx.translate(page.view.x, page.view.y);
   inkCtx.scale(page.view.scale, page.view.scale);
 
-  page.strokes.forEach((stroke) => drawStroke(inkCtx, stroke));
-  if (state.currentStroke) drawStroke(inkCtx, state.currentStroke);
+  drawStroke(inkCtx, state.currentStroke);
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
+  if (state.currentStroke.tool !== "eraser") {
+    ctx.drawImage(staticLayer, 0, 0);
+  }
   ctx.drawImage(inkLayer, 0, 0);
 }
 
@@ -522,32 +591,19 @@ function drawPencil(targetCtx, stroke, pressure) {
 }
 
 function drawCalligraphy(targetCtx, stroke, pressure) {
-  const points = stroke.points;
   const width = strokeWidth(stroke, pressure);
   targetCtx.save();
-  targetCtx.globalAlpha = 0.72 + pressure * 0.2;
+  targetCtx.lineCap = "round";
+  targetCtx.lineJoin = "round";
+  targetCtx.globalAlpha = 0.62 + pressure * 0.2;
+  targetCtx.lineWidth = Math.max(1, width * 0.72);
+  drawSmoothPath(targetCtx, stroke.points);
+  targetCtx.stroke();
 
-  for (let i = 1; i < points.length; i += 1) {
-    const from = points[i - 1];
-    const to = points[i];
-    const angle = Math.atan2(to.y - from.y, to.x - from.x);
-    const distance = Math.hypot(to.x - from.x, to.y - from.y);
-    const steps = Math.max(1, Math.ceil(distance / Math.max(width * 0.34, 1)));
-
-    for (let step = 0; step <= steps; step += 1) {
-      const t = step / steps;
-      const x = from.x + (to.x - from.x) * t;
-      const y = from.y + (to.y - from.y) * t;
-      const p = responsivePressure(from.pressure + (to.pressure - from.pressure) * t);
-      targetCtx.save();
-      targetCtx.translate(x, y);
-      targetCtx.rotate(angle + Math.PI / 4);
-      targetCtx.beginPath();
-      targetCtx.ellipse(0, 0, width * (0.22 + p * 0.26), width * (0.07 + p * 0.1), 0, 0, Math.PI * 2);
-      targetCtx.fill();
-      targetCtx.restore();
-    }
-  }
+  targetCtx.globalAlpha = 0.22 + pressure * 0.12;
+  targetCtx.lineWidth = Math.max(0.8, width * 0.24);
+  drawSmoothPath(targetCtx, stroke.points, { x: width * 0.16, y: -width * 0.12 });
+  targetCtx.stroke();
 
   targetCtx.restore();
 }
@@ -648,9 +704,12 @@ function setActiveSurface(surfaceKey) {
 function maybeAdjustInkForSurface(surfaceKey) {
   const lightSurface = surfaceKey === "white-blank" || surfaceKey === "sepia-blank";
   const darkInk = "#151515";
-  const lightInk = "#f5f5f5";
+  const lightInk = defaultPalette[0];
 
-  if (lightSurface && state.inkColor.toLowerCase() === lightInk) {
+  if (
+    lightSurface &&
+    (state.inkColor.toLowerCase() === lightInk || state.inkColor.toLowerCase() === legacyPalette[0])
+  ) {
     setInkColor(darkInk, { updatePalette: true });
   }
 
@@ -712,7 +771,7 @@ function renderPalette() {
   });
 }
 
-function addPointToStroke(stroke, event) {
+function addPointToStroke(stroke, event, options = {}) {
   const raw = screenToWorld(event.clientX, event.clientY);
   const pressure = eventPressure(event);
   const smooth = Number(smoothInput.value) / 100;
@@ -725,12 +784,14 @@ function addPointToStroke(stroke, event) {
       }
     : { ...raw, pressure };
 
-  if (last && Math.hypot(point.x - last.x, point.y - last.y) < 0.2) {
+  if (last && Math.hypot(point.x - last.x, point.y - last.y) < pointSpacing(stroke)) {
     return;
   }
 
   stroke.points.push(point);
-  updatePressure(pressure);
+  if (options.updatePressure !== false) {
+    updatePressure(pressure);
+  }
   maybeAddDrops(stroke, last, point);
 }
 
@@ -742,12 +803,14 @@ function maybeAddDrops(stroke, from, to) {
   const pressure = Math.max(from.pressure, to.pressure, 0.08);
   if (!profile.spill || spill <= 0) return;
   if (stroke.brush !== "spray" && pressure < 0.64) return;
+  if (stroke.drops.length > 1200) return;
 
   const width = strokeWidth(stroke, pressure);
   const distance = Math.hypot(to.x - from.x, to.y - from.y);
-  const dropletCount = stroke.brush === "spray"
-    ? Math.floor(distance * (3 + spill * 9) * (0.35 + pressure))
-    : Math.floor(distance * spill * pressure * 0.1);
+  const rawDropletCount = stroke.brush === "spray"
+    ? Math.floor(distance * (1.4 + spill * 3.4) * (0.28 + pressure))
+    : Math.floor(distance * spill * pressure * 0.08);
+  const dropletCount = Math.min(stroke.brush === "spray" ? 22 : 8, rawDropletCount);
 
   for (let i = 0; i < dropletCount; i += 1) {
     const t = Math.random();
@@ -770,6 +833,32 @@ function maybeAddDrops(stroke, from, to) {
       y: centerY + Math.sin(angle) * radius,
     });
   }
+}
+
+function sampledPointerEvents(event) {
+  const events =
+    typeof event.getCoalescedEvents === "function"
+      ? event.getCoalescedEvents()
+      : [event];
+  const source = events.length ? events : [event];
+  const limit = state.currentStroke && state.currentStroke.brush === "spray" ? 4 : 8;
+
+  if (source.length <= limit) {
+    return source;
+  }
+
+  const sampled = [];
+  const stride = Math.ceil(source.length / limit);
+  for (let i = 0; i < source.length; i += stride) {
+    sampled.push(source[i]);
+  }
+
+  const last = source[source.length - 1];
+  if (sampled[sampled.length - 1] !== last) {
+    sampled.push(last);
+  }
+
+  return sampled;
 }
 
 function startPointer(event) {
@@ -813,6 +902,7 @@ function movePointer(event) {
     page.view.x += event.clientX - state.lastPanPoint.x;
     page.view.y += event.clientY - state.lastPanPoint.y;
     state.lastPanPoint = { x: event.clientX, y: event.clientY };
+    invalidateStaticLayer();
     scheduleSave();
     scheduleAutoShare();
     requestRender();
@@ -820,13 +910,11 @@ function movePointer(event) {
   }
 
   if (!state.drawing || !state.currentStroke) return;
-  const events =
-    typeof event.getCoalescedEvents === "function"
-      ? event.getCoalescedEvents()
-      : [event];
-
-  (events.length ? events : [event]).forEach((coalesced) => {
-    addPointToStroke(state.currentStroke, coalesced);
+  const events = sampledPointerEvents(event);
+  events.forEach((coalesced, index) => {
+    addPointToStroke(state.currentStroke, coalesced, {
+      updatePressure: index === events.length - 1,
+    });
   });
   requestRender();
 }
@@ -846,6 +934,7 @@ function endPointer(event) {
     state.history.push({ action: "add", pageId: page.id, stroke: state.currentStroke });
     state.redoStack.length = 0;
     state.currentStroke = null;
+    invalidateStaticLayer();
     updateHistoryButtons();
     scheduleSave();
     scheduleAutoShare();
@@ -924,6 +1013,7 @@ function zoomAt(event) {
   page.view.x = screen.x - before.x * page.view.scale;
   page.view.y = screen.y - before.y * page.view.scale;
   deviceStatus.textContent = `${Math.round(page.view.scale * 100)}%`;
+  invalidateStaticLayer();
   scheduleSave();
   scheduleAutoShare();
   requestRender();
@@ -941,6 +1031,7 @@ function addPage() {
   state.activePageId = page.id;
   renderPageTabs();
   updateSurfaceButtons();
+  invalidateStaticLayer();
   scheduleSave();
   scheduleAutoShare();
   requestRender();
@@ -961,6 +1052,7 @@ function renderPageTabs() {
       state.activePageId = page.id;
       renderPageTabs();
       updateSurfaceButtons();
+      invalidateStaticLayer();
       scheduleSave();
       scheduleAutoShare();
       requestRender();
@@ -976,6 +1068,7 @@ function clearPage() {
   page.strokes = [];
   state.history.push({ action: "clear", pageId: page.id, strokes });
   state.redoStack.length = 0;
+  invalidateStaticLayer();
   updateHistoryButtons();
   scheduleSave();
   scheduleAutoShare();
@@ -997,6 +1090,7 @@ function undo() {
   }
 
   state.redoStack.push(op);
+  invalidateStaticLayer();
   updateHistoryButtons();
   scheduleSave();
   scheduleAutoShare();
@@ -1018,6 +1112,7 @@ function redo() {
   }
 
   state.history.push(op);
+  invalidateStaticLayer();
   updateHistoryButtons();
   scheduleSave();
   scheduleAutoShare();
