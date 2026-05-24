@@ -16,16 +16,40 @@ Primary monetization is optional donation support.
 
 ## Stripe Donation Setup
 
-1. Create a Stripe Payment Link for donations.
-2. Use optional preset amounts if desired.
-3. Copy the Payment Link URL.
-4. Replace the donation placeholder in `site/index.html`:
+Current test-mode Payment Link:
+
+```text
+https://buy.stripe.com/test_8x2dR89vGaDf6nngcLcwg00
+```
+
+Created Stripe objects:
+
+- Product: `prod_UZaImzanrSaPBR`
+- Price: `price_1TaR82CK3aVoQtiI4Kjh454i`
+- Payment Link: `plink_1TaR82CK3aVoQtiIfDns3uru`
+
+Configuration:
+
+- Pay what you want
+- Currency: USD
+- Suggested amount: $5
+- Minimum: $1
+- Maximum: $100
+- Hosted Stripe confirmation message after payment
+
+Before public launch:
+
+1. Finish Stripe account activation if needed.
+2. Create or provide live-mode API keys.
+3. Create the same Payment Link in live mode.
+4. Replace the test Payment Link in `site/index.html`.
+5. Remove the "test mode" note from the donation card.
+
+The final production link should look like:
 
 ```html
 <a id="donateButton" class="button primary" href="STRIPE_PAYMENT_LINK">Donate with Stripe</a>
 ```
-
-5. Remove `disabled` styling and `aria-disabled`.
 
 ## Website Direction
 

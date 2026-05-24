@@ -1,3 +1,7 @@
 node_modules/
 shared/latest-canvas.json
 shared/latest-canvas.png
+stripePK.txt
+stripeSK.txt
+.env
+.env.*

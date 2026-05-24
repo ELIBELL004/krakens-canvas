@@ -458,6 +458,13 @@ footer {
   background: var(--panel-strong);
 }
 
+.donate-card small {
+  display: block;
+  margin-top: 12px;
+  color: var(--dim);
+  font-size: 0.78rem;
+}
+
 footer {
   display: flex;
   width: min(1180px, calc(100vw - 36px));

@@ -16,4 +16,6 @@ http://127.0.0.1:4174/site/
 
 ## Stripe Donations
 
-The donate button is intentionally a placeholder. Create a Stripe Payment Link, then replace the disabled donation link in `site/index.html`.
+The donate button currently points to a Stripe test-mode Payment Link.
+
+Before public launch, replace it with a live-mode Payment Link and remove the test-mode note in `site/index.html`.
