@@ -104,9 +104,13 @@ button,
 }
 
 .brand img {
-  width: 28px;
-  height: 28px;
-  object-fit: contain;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 7px;
+  background: #101010;
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.08);
+  object-fit: cover;
 }
 
 .topbar nav {
