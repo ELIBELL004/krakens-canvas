@@ -4,7 +4,6 @@ const demoCanvas = document.querySelector("#demoCanvas");
 const demoCtx = demoCanvas.getContext("2d", { alpha: true });
 const demoClear = document.querySelector("#demoClear");
 const demoSwatches = Array.from(document.querySelectorAll("[data-demo-color]"));
-const demoHint = document.querySelector(".demo-hint");
 
 const strokes = [
   { x: 0.18, y: 0.22, vx: 0.00032, vy: 0.00018, color: "rgba(217, 161, 72, 0.28)" },
@@ -135,7 +134,6 @@ function startDemoStroke(event) {
   demo.pointerId = event.pointerId;
   demo.lastPoint = demoPoint(event);
   demoCanvas.setPointerCapture(event.pointerId);
-  demoHint.hidden = true;
 }
 
 function continueDemoStroke(event) {
@@ -178,7 +176,6 @@ demoClear.addEventListener("click", () => {
   demoCtx.setTransform(1, 0, 0, 1, 0, 0);
   demoCtx.clearRect(0, 0, demoCanvas.width, demoCanvas.height);
   demoCtx.restore();
-  demoHint.hidden = false;
 });
 
 demoSwatches.forEach((swatch) => {
