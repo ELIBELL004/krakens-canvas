@@ -56,16 +56,14 @@
               </div>
             </div>
             <div class="window-board">
-              <img class="mascot" src="../assets/icon.png" alt="Krakens Canvas mascot">
-              <svg viewBox="0 0 620 360" role="img" aria-label="Preview sketch on Krakens Canvas">
-                <path class="ink amber" d="M73 202 C118 146 144 97 156 60" />
-                <path class="ink amber" d="M121 166 C184 174 239 130 230 89 C224 56 174 145 170 217" />
-                <path class="ink amber" d="M218 178 C267 178 300 161 310 147 C323 129 259 138 249 177 C241 205 315 201 337 171" />
-                <path class="ink amber" d="M369 155 L369 205 M391 155 L391 205" />
-                <path class="ink amber" d="M429 169 C463 129 498 153 486 188 C474 224 422 209 429 169" />
-                <path class="ink amber" d="M523 134 L523 195 M523 225 L523 233" />
-                <path class="ink rose" d="M415 265 L460 250 L497 282 L495 222 L531 185 L480 187 L451 141 L439 196 L390 211 L432 232 Z" />
-              </svg>
+              <div class="demo-tools" aria-label="Preview drawing controls">
+                <button class="demo-swatch is-active" type="button" data-demo-color="#d9a148" aria-label="Amber ink"></button>
+                <button class="demo-swatch" type="button" data-demo-color="#df728d" aria-label="Rose ink"></button>
+                <button class="demo-swatch" type="button" data-demo-color="#88dbb1" aria-label="Green ink"></button>
+                <button id="demoClear" type="button">Clear</button>
+              </div>
+              <canvas id="demoCanvas" aria-label="Draw on the Krakens Canvas website preview"></canvas>
+              <p class="demo-hint">Draw here</p>
             </div>
           </div>
         </div>
