@@ -31,7 +31,7 @@ Krakens Canvas is basically a local place for that: draw first, explain second.
 Demo beats:
 
 - Open Krakens Canvas.
-- Pin it above Discord or code.
+- Draw beside Discord or code.
 - Write "Hello!" and draw a star.
 - Click Share.
 - Ask Codex: "what did I just write/draw?"

@@ -2,12 +2,15 @@
   "name": "krakens-canvas",
   "version": "0.2.0",
   "description": "A local pressure-sensitive whiteboard for sketching ideas.",
+  "author": "Elias Safi",
   "main": "main.cjs",
   "scripts": {
     "start": "electron .",
+    "pack": "electron-packager . \"Krakens Canvas\" --platform=win32 --arch=x64 --out=dist --overwrite --icon=assets/icon.ico --prune=true --ignore=\"^/dist($|/)\" --ignore=\"^/node_modules($|/)\" --ignore=\"^/site($|/)\" --ignore=\"^/marketing($|/)\" --ignore=\"^/shared/latest-canvas\\\\.(png|json)$\"",
     "site": "python -m http.server 4174 --bind 127.0.0.1"
   },
   "devDependencies": {
+    "@electron/packager": "^20.0.0",
     "electron": "^42.2.0"
   }
 }

@@ -1,4 +1,5 @@
 node_modules/
+dist/
 shared/latest-canvas.json
 shared/latest-canvas.png
 stripePK.txt

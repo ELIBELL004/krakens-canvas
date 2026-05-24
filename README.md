@@ -22,9 +22,15 @@ A small local whiteboard prototype for pressure-sensitive tablet drawing.
 
 Double-click `Start Inkboard.cmd`. It opens the board as a native local app window.
 
-## Keep It On Top
+## Package It
 
-Click `Pin` inside Krakens Canvas to keep the window above other apps. Click it again to unpin. You can also run `Toggle Always On Top.cmd` from the project folder.
+Build a portable Windows app folder:
+
+```powershell
+npm.cmd run pack
+```
+
+The packaged app is written to `dist/Krakens Canvas-win32-x64/`. Zip that folder for distribution, or use the generated portable ZIP when present.
 
 ## Share Sketches With Codex
 

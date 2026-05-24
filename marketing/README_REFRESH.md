@@ -7,7 +7,7 @@ Use this when you are ready for the GitHub repo to read less like internal notes
 
 Draw the thought before it becomes a sentence.
 
-Krakens Canvas is a local pressure-sensitive black-grid whiteboard for tablet-first thinking. It supports pressure-sensitive ink, infinite canvas pages, always-on-top pinning, and a Codex sharing bridge so your sketches can become conversational context.
+Krakens Canvas is a local pressure-sensitive black-grid whiteboard for tablet-first thinking. It supports pressure-sensitive ink, infinite canvas pages and a Codex sharing bridge so your sketches can become conversational context.
 
 ## Highlights
 
@@ -19,12 +19,12 @@ Krakens Canvas is a local pressure-sensitive black-grid whiteboard for tablet-fi
 - Focus mode for hiding the toolbar.
 - Shape assist for rough lines, boxes, and circles.
 - Autosave and PNG export.
-- Always-on-top `Pin` mode.
+- One-click sketch sharing with Codex.
 - `Share` and `Auto` modes for Codex sketch inspection.
 
 ## Why
 
-Sometimes the fastest way to explain an idea is to draw it. Krakens Canvas is built for that moment: sketch the thought, keep it pinned beside your work, and let Codex inspect the current canvas when words are slower than a diagram.
+Sometimes the fastest way to explain an idea is to draw it. Krakens Canvas is built for that moment: sketch the thought, share the canvas, and let Codex inspect the current canvas when words are slower than a diagram.
 
 ## Run
 
