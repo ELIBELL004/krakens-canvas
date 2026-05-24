@@ -16,9 +16,11 @@ http://127.0.0.1:4174/site/
 
 ## Stripe Donations
 
-The donate button currently points to a Stripe test-mode Payment Link.
+The donate button points to the live Stripe Payment Link:
 
-Before public launch, replace it with a live-mode Payment Link and remove the test-mode note in `site/index.html`.
+```text
+https://buy.stripe.com/9B6fZgcAodvb0wT5n4ak000
+```
 
 ## Download Button
 

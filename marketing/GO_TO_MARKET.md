@@ -12,14 +12,14 @@ Primary monetization is optional donation support.
 - No account wall.
 - No trial clock.
 - No cloud subscription.
-- Stripe donations can be added via a Payment Link.
+- Stripe donations run through a live Stripe Payment Link.
 
 ## Stripe Donation Setup
 
-Current test-mode Payment Link:
+Current live Payment Link:
 
 ```text
-https://buy.stripe.com/test_8x2dR89vGaDf6nngcLcwg00
+https://buy.stripe.com/9B6fZgcAodvb0wT5n4ak000
 ```
 
 Created Stripe objects:
@@ -37,18 +37,10 @@ Configuration:
 - Maximum: $100
 - Hosted Stripe confirmation message after payment
 
-Before public launch:
-
-1. Finish Stripe account activation if needed.
-2. Create or provide live-mode API keys.
-3. Create the same Payment Link in live mode.
-4. Replace the test Payment Link in `site/index.html`.
-5. Remove the "test mode" note from the donation card.
-
-The final production link should look like:
+The production link is:
 
 ```html
-<a id="donateButton" class="button primary" href="STRIPE_PAYMENT_LINK">Donate with Stripe</a>
+<a id="donateButton" class="button primary" href="https://buy.stripe.com/9B6fZgcAodvb0wT5n4ak000">Donate with Stripe</a>
 ```
 
 ## Website Direction
@@ -74,11 +66,9 @@ The site should feel like the app:
 
 1. Keep GitHub private while shaping the first public story.
 2. Add one real screenshot or GIF to `site/` and README.
-3. Create a Stripe donation link.
-4. Replace donation placeholder.
-5. Package a Windows release or document the current launcher clearly.
-6. Flip GitHub repo public.
-7. Post a demo showing drawing -> Share/Auto -> Codex interpretation.
+3. Package a Windows release or document the current launcher clearly.
+4. Flip GitHub repo public.
+5. Post a demo showing drawing -> Share/Auto -> Codex interpretation.
 
 ## Message
 
