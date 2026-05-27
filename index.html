@@ -37,8 +37,44 @@
                 <option value="pencil">Pencil</option>
                 <option value="calligraphy">Calligraphy</option>
                 <option value="spray">Spray</option>
+                <option value="round">Round brush</option>
+                <option value="flat">Flat brush</option>
+                <option value="dry">Dry brush</option>
+                <option value="halftone">Halftone</option>
+                <option value="halftone-soft">Soft halftone</option>
               </select>
             </label>
+
+            <details class="art-subpanel" open>
+              <summary>Layers</summary>
+              <div id="layerList" class="layer-list" aria-label="Layers"></div>
+              <div class="layer-actions">
+                <button id="addLayerButton" type="button">Add layer</button>
+                <label class="select-control layer-opacity-control">
+                  <span>Opacity</span>
+                  <input id="layerOpacityInput" type="range" min="0" max="100" value="100">
+                </label>
+              </div>
+            </details>
+
+            <details class="art-subpanel">
+              <summary>Transform</summary>
+              <div class="transform-controls">
+                <label class="select-control">
+                  <span>Rotate</span>
+                  <input id="transformRotateInput" type="range" min="-180" max="180" value="0">
+                </label>
+                <label class="select-control">
+                  <span>Scale</span>
+                  <input id="transformScaleInput" type="range" min="25" max="200" value="100">
+                </label>
+                <div class="transform-actions">
+                  <button id="copySelectionButton" type="button">Copy</button>
+                  <button id="pasteSelectionButton" type="button" disabled>Paste</button>
+                </div>
+                <button id="clearTransformButton" type="button">Clear selection</button>
+              </div>
+            </details>
 
             <label class="toggle-control theme-control">
               <input id="themeToggle" type="checkbox">
@@ -55,6 +91,7 @@
         <div class="control-group" role="group" aria-label="Tools">
           <button class="tool-button is-active" type="button" data-tool="pen" aria-pressed="true">Pen</button>
           <button class="tool-button" type="button" data-tool="eraser" aria-pressed="false">Eraser</button>
+          <button class="tool-button" type="button" data-tool="transform" aria-pressed="false">Transform</button>
           <button class="tool-button" type="button" data-tool="pan" aria-pressed="false">Pan</button>
         </div>
 
@@ -109,6 +146,7 @@
         <div class="control-group" role="group" aria-label="Canvas actions">
           <button id="undoButton" type="button" disabled>Undo</button>
           <button id="redoButton" type="button" disabled>Redo</button>
+          <button id="neatenButton" type="button" title="Neaten recent handwriting (Ctrl+Alt+N)">Neaten</button>
           <button id="clearButton" type="button">Clear</button>
           <button id="saveButton" type="button">Save PNG</button>
           <button id="pinButton" type="button">Pin</button>

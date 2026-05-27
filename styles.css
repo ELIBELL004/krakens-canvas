@@ -214,6 +214,73 @@ body.light-mode .art-bar[open] summary {
   gap: 8px;
 }
 
+.art-subpanel {
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid var(--panel-border);
+  padding-top: 10px;
+}
+
+.art-subpanel summary {
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.layer-list {
+  display: grid;
+  max-height: 150px;
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.layer-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.layer-row button {
+  justify-content: flex-start;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.layer-row button.is-active {
+  border-color: rgba(255, 255, 255, 0.62);
+  background: var(--accent);
+  color: #111;
+}
+
+body.light-mode .layer-row button.is-active {
+  color: #fff;
+}
+
+.layer-row small {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.layer-actions,
+.transform-controls {
+  display: grid;
+  gap: 8px;
+}
+
+.transform-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
 .surface-options {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -399,6 +466,10 @@ body.light-mode #shareButton.is-active {
 
 #inkCanvas.is-panning {
   cursor: grab;
+}
+
+#inkCanvas.is-transforming {
+  cursor: crosshair;
 }
 
 #inkCanvas.is-erasing {
